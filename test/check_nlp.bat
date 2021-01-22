@@ -1,1 +1,1 @@
-curl -w '\n' $1
+curl -w '\n' %1
