@@ -81,7 +81,7 @@ The dockers can be managed via several steps:
 Make sure that all requirements in `1. Prerequisite` are satisfied.
 It it **important** to note that all `docker` and `docker-compose` command must be execute inside the `pskgi_poc` repo directory, where the `docker-compose.yml` is present.
 
-###### a. Obtain the dockers by pulling the built docker images from Docker Hub, create the containers, and run them
+###### a. Obtain the dockers by pulling the built docker images from [repositories](https://hub.docker.com/repository/docker/nghiadh/nlp) on Docker Hub, create the containers, and run them
 
     docker-compose pull
     docker-compose up --no-build
