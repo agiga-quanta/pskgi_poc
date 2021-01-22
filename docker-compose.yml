@@ -14,7 +14,7 @@ services:
     build:
       context: ./nlp
       dockerfile: Dockerfile
-    image: nlp:0.1.0
+    image: nghiadh/nlp:0.1.0
     hostname: nlp
     container_name: nlp
     ports:

@@ -72,9 +72,7 @@ Check out the [repo](https://github.com/nghia71/pskgi_poc) by opening a Terminal
 
 ##### 2. Setting up the Dockers:
 The dockers can be managed via several steps:
-- Obtain the dockers by:
-  + Pull the docker images from Docker Hub.
-  + Build the docker images, create the containers, and run them.
+- Obtain the dockers by pulling the docker images from Docker Hub.
 - Stop the running containers
 - Removing unused images
 
@@ -83,50 +81,37 @@ The dockers can be managed via several steps:
 Make sure that all requirements in `1. Prerequisite` are satisfied.
 It it **important** to note that all `docker` and `docker-compose` command must be execute inside the `pskgi_poc` repo directory, where the `docker-compose.yml` is present.
 
-###### a. Obtain the dockers:
-
-***Option 1: Pull the docker images from Docker Hub***
-
-For the first time:
-
-    docker-compose up --build
-
-Subsequent invocations:
+###### a. Obtain the dockers by pulling the built docker images from Docker Hub, create the containers, and run them
 
     docker-compose up
 
 Add a `-d` option if you want them run in the background
 
-    docker-compose up -d --build
     docker-compose up -d
 
-*Note: it will takes sometimes to download `PyTorch` (700MB), and neural English language models for `stanza`.*
 
-*For Ubuntu: in case permission error is encountered at the first run of docker-compose, try to create the docker user group and add yourself to it*
+***[Optional]: Build the docker images, create the containers, and run them***
 
-    sudo groupadd docker
-    sudo usermod -aG docker ${USER}
-
-***Option 2: Build the docker images, create the containers, and run them***
-
-For the first time:
+Rebuild the image:
 
     docker-compose up --build
-
-Subsequent invocations:
-
-    docker-compose up
 
 Add a `-d` option if you want them run in the background
 
     docker-compose up -d --build
-    docker-compose up -d
+
+Later invocations:
+
+    docker-compose up
+
 
 *Note: it will takes sometimes to download `PyTorch` (700MB), and neural English language models for `stanza`.*
 
 ###### b. Stop the running containers
 
-If they are running on the console (i.e. without `-d` option). Press `Ctrl+C` to gracefully shutdown.
+If they are running on the console (i.e. without `-d` option). Press `Ctrl+C` to gracefully shutdow.
+
+You can also stop it from the other Terminal (in `pskgi_poc` directory):
 
     docker-compose down
 
