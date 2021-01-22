@@ -1,6 +1,6 @@
 __author__ = "Nghia Doan"
 __copyright__ = "Copyright 2021"
-__version__ = "0.0.1"
+__version__ = "0.1.0"
 __maintainer__ = "Nghia Doan"
 __email__ = "nghia71@gmail.com"
 __status__ = "Development"

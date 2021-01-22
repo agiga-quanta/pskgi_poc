@@ -1,6 +1,6 @@
 __author__ = "Nghia Doan"
 __copyright__ = "Copyright 2021"
-__version__ = "1.0.0"
+__version__ = "0.1.0"
 __maintainer__ = "Nghia Doan"
 __email__ = "nghia71@gmail.com"
 __status__ = "Development"
@@ -21,16 +21,12 @@ class PostProcessor(object):
     - noun phrases based on given Tree Bank Grammar that is configurable
     in conf/app.ini, section `key_phrase`, entry `grammar`.
 
-    Extracted data of a document is encapsulated into a dictionary:
-    {
-        'et': list of extracted entities (see below)
-        'st': list of sentence data (see below)
-    }
-
-    Processed sentence of the document is represented by a dictionary:
+    Extracted data of a document is represented by a list of sentences,
+    each is a dictionary:
     {
         'ot': the original text of the sentence,
-        'sm': the sentiment score (0, 1, 2), as a string
+        'sm': the sentiment score (0, 1, 2), as a string,
+        'et': list of extracted entities (see below),
         'kp': list of extracted key phrases, for format see below
     }
 
@@ -87,13 +83,11 @@ class PostProcessor(object):
         ]
 
     def process(self, document):
-        return {
-            'et': self.extract_entities(document.entities),
-            'st': [
-                {
-                    'ot': sentence.text,
-                    'sm': sentence.sentiment,
-                    'kp': self.filter_key_phrases(sentence.words)
-                } for sentence in document.sentences
-            ]
-        }
+        return [
+            {
+                'ot': sentence.text,
+                'sm': sentence.sentiment,
+                'et': self.extract_entities(document.entities),
+                'kp': self.filter_key_phrases(sentence.words)
+            } for sentence in document.sentences
+        ]

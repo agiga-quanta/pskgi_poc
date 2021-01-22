@@ -12,12 +12,23 @@ This **Proof of Concept** (PoC) is intended to demonstrate the value of KG techn
 
 ##### 1. Prerequisite
 
+Following software are required, please install their latest versions:
+- `Docker Desktop`/`Docker Engine`
+- `Docker Compose`
+- `Python 3.8+`
+- `git`
+- `pskgi_poc` (this repository)
+
+<details><summary>Click for details!</summary>
+
 ###### Step 1 - Install `Docker Desktop`/`Docker Engine`
-For macOS and Windows, install [Docker Desktop](https://docs.docker.com/desktop/).
+For macOS or Windows install [Docker Desktop](https://docs.docker.com/desktop/).
+
+For people who know what WSL is: Installing `Windows Subsystem for Linux 2`, a.k.a `WSL2` is highly recommended before installing Docker Desktop.
 
 For Linux, install [Docker Engine](https://docs.docker.com/engine/).
 
-**Important**: it is recommended that at least 6GB memory and 10GB disk space allowed for Docker Desktop. Check the `Preferences` menu-item of the `Docker` top menu icon.
+**Important**: it is recommended that at least 6GB memory and 10GB disk space allowed for Docker Desktop. Check the `Preferences`, and then `Resources` menu-item of the `Docker` top menu icon to adjust them.
 
 ###### Step 2 - Install `Docker Compose`
 For all system, install [Docker Compose](https://docs.docker.com/compose/).
@@ -43,20 +54,38 @@ Make sure that you have `git` install on your system.
       sudo yum upgrade
       sudo yum install git
 
-It is likely already installed if it is a mac
+*For Ubuntu: in case permission error is encountered at the first run of docker-compose, try to create the docker user group and add yourself to it*
 
-###### Step 4 - Install `pskgi_poc` (this repository):
+    sudo groupadd docker
+    sudo usermod -aG docker ${USER}
+
+###### Step 4 - Install `Python`
+Follow instructions this [guide](https://installpython3.com/).
+
+###### Step 5 - Install `pskgi_poc` (this repository):
 Check out the [repo](https://github.com/nghia71/pskgi_poc) by opening a Terminal or Command Prompt on your system, go to a directory where you want to place this repository, and type:
 
     git clone https://github.com/nghia71/pskgi_poc.git
     cd pskgi_poc
 
+</details>
+
 ##### 2. Setting up the Dockers:
+The dockers can be managed via several steps:
+- Obtain the dockers by:
+  + Pull the docker images from Docker Hub.
+  + Build the docker images, create the containers, and run them.
+- Stop the running containers
+- Removing unused images
+
+<details><summary>Click for details!</summary>
 
 Make sure that all requirements in `1. Prerequisite` are satisfied.
 It it **important** to note that all `docker` and `docker-compose` command must be execute inside the `pskgi_poc` repo directory, where the `docker-compose.yml` is present.
 
-###### a. Build the docker images, create the containers, and run them:
+###### a. Obtain the dockers:
+
+***Option 1: Pull the docker images from Docker Hub***
 
 For the first time:
 
@@ -78,6 +107,22 @@ Add a `-d` option if you want them run in the background
     sudo groupadd docker
     sudo usermod -aG docker ${USER}
 
+***Option 2: Build the docker images, create the containers, and run them***
+
+For the first time:
+
+    docker-compose up --build
+
+Subsequent invocations:
+
+    docker-compose up
+
+Add a `-d` option if you want them run in the background
+
+    docker-compose up -d --build
+    docker-compose up -d
+
+*Note: it will takes sometimes to download `PyTorch` (700MB), and neural English language models for `stanza`.*
 
 ###### b. Stop the running containers
 
@@ -91,25 +136,50 @@ If they are running on the console (i.e. without `-d` option). Press `Ctrl+C` to
 
 *Note: it is worth to run because it can remove over 3.5GB temporary data produced during the build of the docker image*
 
+</details>
+
 ##### 3. Using the Dockers:
+
+Instructions to use and/or monitor following dockers:
+- `nlp`
+
+<details><summary>Click for details!</summary>
 
 ##### a. `nlp`:
 
 Assume that you are in `pskgi_poc` directory, check if it's running:
 
     cd test
+
+**For macOS, Linux**
+
     ./check_nlp.sh
+
+**For Windows**
+
+Assume that you are in `pskgi_poc` directory, check if it's running:
+
+    check_nlp.bat
 
 If the script prints `"OK"`, the service is ready, then test it with proper input. You should see `json` output on the console.
 
-    cd test
+**For macOS, Linux**
+
     ./test_nlp.sh http://127.0.0.1:8000/process/ nlp_input.txt
+
+**For Windows**
+
+    test_nlp.bat http://127.0.0.1:8000/process/ nlp_input.txt
+
+
 
 *Note: see the Input and Output sections of the Natural Language Processing (NLP) micro service for more details*
 
+</details>
+
 ### C. System Architecture
 
-TBD
+*TBA*
 
 ### D. Components
 
@@ -129,6 +199,9 @@ How input is submitted to `nlp`:
 - a HTTP POST request to **http://`HOST_NAME`:8000/process/**
 - A `json` document formatted as below must be sent in the `request's body`
 
+<details><summary>Click for details!</summary>
+
+
       ####################
       # Define the document model that the webapp receives from submission:
       # It is a json format:
@@ -137,26 +210,31 @@ How input is submitted to `nlp`:
       #   "c": the textual content of the document.
       # }
 
+</details>
+
 ##### Output:
-`nlp` processes the document and extracts:
+`nlp` processes the document and extracts for each sentence:
 - `sentiment score`
 - `named entities` (18 named entity types
 described [here](https://stanfordnlp.github.io/stanza/available_models.html).
 - `noun phrases` based on given *treebank annotations* that is configurable
 in *conf/app.ini*, section *key_phrase*, entry *grammar*.
 
+<details><summary>Click for details!</summary>
+
   Output is a `json` document in following format:
 
       {
-          'et': list of extracted entities (see below)
-          'st': list of sentence data (see below)
+          'u': the uid of the document
+          'p': the processed content, see PostProcessor for more information
       }
 
-  A sentence data is represented by a dictionary:
+  Processed document is represented by a list of sentences, each is a dictionary:
 
       {
           'ot': the original text of the sentence,
-          'sm': the sentiment score (0, 1, 2), as a string
+          'sm': the sentiment score (0, 1, 2), as a string,
+          'et': list of extracted entities (see below),
           'kp': list of extracted key phrases, for format see below
       }
 
@@ -179,16 +257,25 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
 
       JJ? ((VB[G|N|D]|NN[P]?[S]?) (HYPH|IN|POS)*)* NN[P]?[S]?
 
+</details>
+
 ##### Sample input & output:
 
-Sample input from [PSF](https://www.psf.ca/news-media/238056-granted-16-south-vancouver-island-salmon-community-projects-pacific-salmon), this can be located at `test/nlp_input.txt`
+<details>
+  <summary>Sample input, click for more!</summary>
 
-    {
-        "u":"123",
-        "c":"The Pacific Salmon Foundation (PSF) announces grants for 16 projects in the South Vancouver Island region, totalling $238,056 through the PSF Community Salmon Program (CSP). The total value of the projects, which includes community fundraising, contributions and volunteer time, is $1,488,711 and is focused on the rehabilitation of key Pacific salmon habitats and stock enhancement in the South Vancouver Island area."
-    }
+  Sample input from [PSF](https://www.psf.ca/news-media/238056-granted-16-south-vancouver-island-salmon-community-projects-pacific-salmon), this can be located at `test/nlp_input.txt`
 
-Output
+      {
+          "u":"123",
+          "c":"The Pacific Salmon Foundation (PSF) announces grants for 16 projects in the South Vancouver Island region, totalling $238,056 through the PSF Community Salmon Program (CSP). The total value of the projects, which includes community fundraising, contributions and volunteer time, is $1,488,711 and is focused on the rehabilitation of key Pacific salmon habitats and stock enhancement in the South Vancouver Island area."
+      }
+</details>
+
+<details>
+  <summary>Sample output, click for more!</summary>
+
+  Sample output from processing of the above input.
 
     {
        "p" : {
@@ -402,3 +489,14 @@ Output
        },
        "u" : "123"
     }
+</details>
+
+##### Limitations:
+Following features are not included:
+1. Multiple language support (only English at the moment).
+2. Dynamic treebank annotations parsing (to obtain key phrases with different grammatical compositions)
+3. Relations between named entities and key phrases.
+4. Dependency-parsing (that builds a tree structure of words from the input sentence, which represents the syntactic dependency relations between words)
+5. Enabling GPU usage inside container for better ML performance.
+6. Configurable parallel processing and throughput for higher performance.
+7. Ready-made imagescontainers in Docker Hub
