@@ -87,7 +87,7 @@ If they are running on the console (i.e. without `-d` option). Press `Ctrl+C` to
 
 ##### 3. Using the Dockers:
 
-##### a. `nlp`: 
+##### a. `nlp`:
 
 Assume that you are in `pskgi_poc` directory, check if it's running:
 
@@ -396,12 +396,3 @@ Output
        },
        "u" : "123"
     }
-
-
-- Some additional works to:
-	+ extract all Named Entities from the text (per sentence, per document, per data entry).
-	+ extract all Key Phrases based on certain grammar, please see some example below.
-	+ create a few tests to make sure all works and can be used as tests for CI/CD.
-- Wrap all these into a docker, that shall be easily built from scratch by pulling from a GitHub repo and run a few commands in Command Prompt/Terminal.
-- Create some scripts that can be used from command-line to test what named entities and key phrases can be extracted from input text.
-- A detailed README.md with some diagrams so that everybody can understand without digging into the code.
