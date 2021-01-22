@@ -83,18 +83,22 @@ It it **important** to note that all `docker` and `docker-compose` command must 
 
 ###### a. Obtain the dockers by pulling the built docker images from Docker Hub, create the containers, and run them
 
-    docker-compose up
+    docker-compose pull
+    docker-compose up --no-build
+
+*Note: it will takes sometimes to download about 2GB image.*
 
 Add a `-d` option if you want them run in the background
 
-    docker-compose up -d
-
+    docker-compose up -d --no-build
 
 ***[Optional]: Build the docker images, create the containers, and run them***
 
 Rebuild the image:
 
     docker-compose up --build
+
+*Note: it will takes sometimes to download `PyTorch` (700MB), and neural English language models for `stanza`.*
 
 Add a `-d` option if you want them run in the background
 
@@ -104,8 +108,6 @@ Later invocations:
 
     docker-compose up
 
-
-*Note: it will takes sometimes to download `PyTorch` (700MB), and neural English language models for `stanza`.*
 
 ###### b. Stop the running containers
 
