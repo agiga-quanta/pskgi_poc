@@ -73,6 +73,12 @@ Add a `-d` option if you want them run in the background
 
 *Note: it will takes sometimes to download `PyTorch` (700MB), and neural English language models for `stanza`.*
 
+*For Ubuntu: in case permission error is encountered at the first run of docker-compose, try to create the docker user group and add yourself to it*
+
+    sudo groupadd docker
+    sudo usermod -aG docker ${USER}
+
+
 ###### b. Stop the running containers
 
 If they are running on the console (i.e. without `-d` option). Press `Ctrl+C` to gracefully shutdown.
