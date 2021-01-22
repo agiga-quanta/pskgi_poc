@@ -172,8 +172,9 @@ If the script prints `"OK"`, the service is ready, then test it with proper inpu
     test_nlp.bat http://127.0.0.1:8000/process/ nlp_input.txt
 
 
+*Note 1: the `nlp` docker is accessible from anywhere if the host's IP and port 8000 is reachable.*
 
-*Note: see the Input and Output sections of the Natural Language Processing (NLP) micro service for more details*
+*Note 2: see the Input and Output sections of the Natural Language Processing (NLP) micro service for more details*
 
 </details>
 
