@@ -483,8 +483,6 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
 Following features are not included:
 1. Multiple language support (only English at the moment).
 2. Dynamic treebank annotations parsing (to obtain key phrases with different grammatical compositions)
-3. Relations between named entities and key phrases.
-4. Dependency-parsing (that builds a tree structure of words from the input sentence, which represents the syntactic dependency relations between words)
-5. Enabling GPU usage inside container for better ML performance.
-6. Configurable parallel processing and throughput for higher performance.
-7. Ready-made imagescontainers in Docker Hub
+3. Dependency-parsing (that builds a tree structure of words from the input sentence, which represents the syntactic dependency relations between words)
+4. Enabling GPU usage inside container for better ML performance.
+5. Configurable parallel processing and throughput for higher performance.
