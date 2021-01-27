@@ -7,6 +7,8 @@
 # - Apache POI and related libaries for xls(x) processing
 ####################
 
+mkdir -p data logs plugins
+
 NEO4J_VERSION=4.2.2
 
 GDS_LIB_VERSION=1.4.1
