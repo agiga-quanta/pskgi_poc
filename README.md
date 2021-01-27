@@ -130,6 +130,7 @@ You can also stop it from the other Terminal (in `pskgi_poc` directory):
 Instructions to use and/or monitor following dockers:
 - `nlp`
 - `neo4j`
+- `show`
 
 <details><summary>Click for details!</summary>
 
@@ -199,6 +200,17 @@ Open the brower, go to http://localhost:7474, enter username (neo4j) and passwor
     RETURN DISTINCT(e) AS species, COLLECT([d, oc, kc]) AS mentioned_locations;
 
 ![Match locations, key phrases related to salmons in projects or grants](img/graph.png)
+
+##### c. `show`:
+
+  A simple docker, to host the interactive slideshow.
+
+    docker-compose pull
+    docker-compose up --no-build
+
+  To build this docker:
+
+    docker-compose up --build show
 
 </details>
 

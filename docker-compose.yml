@@ -56,6 +56,20 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_jobs_pool_num__threads=4
       - NEO4J_apoc_jobs_scheduled_num__threads=4
+      - NEO4j_browser_remote__content__hostname__whitelist=*
+
+  ####################
+  # show:
+  #
+  show:
+    build:
+      context: ./show
+      dockerfile: Dockerfile
+    image: nghiadh/show:0.1.0
+    hostname: show
+    container_name: show
+    ports:
+      - 8001:8001
 
 ################################################################################
 #

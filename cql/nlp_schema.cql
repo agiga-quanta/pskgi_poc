@@ -64,7 +64,7 @@ CREATE CONSTRAINT ON (n:TIME) ASSERT n.c IS UNIQUE;
 CREATE CONSTRAINT ON (n:WORK_OF_ART) ASSERT n.c IS UNIQUE;
 // - the entity type label (18 named entity types, e.g. PERSON)
 CREATE INDEX ON :NE(n);
-// - n is the numner of occurences of the entity
+// - n is the number of occurences of the entity
 //
 // Key Phrase
 CREATE CONSTRAINT ON (n:KP) ASSERT n.c IS UNIQUE;
