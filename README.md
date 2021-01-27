@@ -68,6 +68,10 @@ Check out the [repo](https://github.com/nghia71/pskgi_poc) by opening a Terminal
     git clone https://github.com/nghia71/pskgi_poc.git
     cd pskgi_poc
 
+Collect addtional libraries for `neo4j`:
+
+    ./gather_neo4j_plugins.sh
+
 </details>
 
 ##### 2. Setting up the Dockers:
