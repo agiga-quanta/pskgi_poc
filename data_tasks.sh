@@ -35,7 +35,7 @@ commands=$1
 if [[ $commands == *"a"* ]]; then
   if [ $# -lt 6 ]; then
     echo "Usage: ./data_tasks.sh n <NEO4J_CONTAINER> <USER_NAME> <PASSWORD> <BOLT_URL> <SCHEMA_FILE>"
-    echo "  SCHEMA_FILE: the full name of the schema file written in Cypher"
+    echo "  SCHEMA_FILE: the full name of the schema file written in Cypher, e.g. cql/nlp_schema.cql"
   else
     printf "Add new schema ...\n"
     (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5) < $6
