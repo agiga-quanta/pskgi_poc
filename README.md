@@ -74,6 +74,23 @@ Collect addtional libraries for `neo4j`:
 
 </details>
 
+##### 2. Shortcut to demo:
+
+Assume that you are in `pskgi_poc` directory:
+
+    ./run.sh
+
+Wait until you see the following line, it would mean all three docker containers (nlp, neo4j, show) are running.
+
+    neo4j    | 2021-01-27 23:37:39.305+0000 INFO  Started.
+
+Open the browser, go to http://localhost:7474, enter username (neo4j) and password (pskgi), type the below and press `[Ctrl/Cmd]+Enter`:
+
+      :play http://localhost:8001/html/show.html
+
+and follow the instructions on the screen.
+
+
 ##### 2. Setting up the Dockers:
 The dockers can be managed via several steps:
 - Obtain the dockers by pulling the docker images from Docker Hub.
@@ -193,7 +210,7 @@ Import data from a `xlsx` formatted data file, placed in `import/` directory, fo
 
     ./data_tasks.sh j neo4j neo4j pskgi bolt://localhost:7687 /input.xlsx psf_news\!A1:B6 http://nlp:8000/process/
 
-Open the brower, go to http://localhost:7474, enter username (neo4j) and password (pskgi), type the below and press `[Ctrl/Cmd]+Enter`:
+Open the browser, go to http://localhost:7474, enter username (neo4j) and password (pskgi), type the below and press `[Ctrl/Cmd]+Enter`:
 
     MATCH (e:NE)-[:E_IN_S]->(s)<-[:E_IN_S]-(loc:LOC)-[:W_IN_E]-(w:LW)
       WHERE e.c IN ["Coho", "Chinook", "Chum", "Sockeye"] AND w.l = "river"
