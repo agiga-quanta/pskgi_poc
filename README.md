@@ -140,13 +140,13 @@ Assume that you are in `pskgi_poc` directory, check if it's running:
 
 **For macOS, Linux**
 
-    ./check_nlp.sh
+    ./check_nlp.sh http://127.0.0.1:8000/
 
 **For Windows**
 
 Assume that you are in `pskgi_poc` directory, check if it's running:
 
-    check_nlp.bat
+    check_nlp.bat http://127.0.0.1:8000/
 
 If the script prints `"OK"`, the service is ready, then test it with proper input. You should see `json` output on the console.
 
@@ -206,7 +206,7 @@ How input is submitted to `nlp`:
 - `named entities` (18 named entity types
 described [here](https://stanfordnlp.github.io/stanza/available_models.html).
 - `noun phrases` based on given *treebank annotations* that is configurable
-in *conf/app.ini*, section *key_phrase*, entry *grammar*.
+in *conf/nlp.ini*, section *key_phrase*, entry *grammar*.
 
 <details><summary>Click for details!</summary>
 
@@ -220,26 +220,28 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
   Processed document is represented by a list of sentences, each is a dictionary:
 
       {
-          'ot': the original text of the sentence,
-          'sm': the sentiment score (0, 1, 2), as a string,
-          'et': list of extracted entities (see below),
-          'kp': list of extracted key phrases, for format see below
+          't': the original text of the sentence,
+          's': the sentiment score (0, 1, 2), as a string,
+          'e': list of extracted entities (see below),
+          'k': list of extracted key phrases, for format see below
       }
 
-  Extracted entities of a document is a list of dictionaries:
+    Extracted entities of a document is a list of dictionaries:
 
       {
-          't': the entity type, one of the 18 named entity types, e.g. PERSON
-          'c': the textual content, for example `First Nations`
-          'l': list of lemmatized forms of the entity's words
+          't': the entity type, one of the 18 named entity types, e.g. PERSON,
+          'c': the textual content, for example `First Nations`,
+          'w': list of words, each is a dictionary, see below
       }
 
-  Extracted key phrases of a sentence is a list of dictionaries:
+    Extracted key phrases of a sentence is a list of dictionaries:
 
-    {
-        'c': the textual content, e.g. `restoration stock assessment activities`
-        'l': lemmatized forms, e.g ['restoration', 'stock', 'assessment', 'activity']
-    }
+      {
+          'c': the textual content, e.g. `restoration stock assessment activities`
+          'w': list of words, each is a dictionary, see below
+      }
+
+    Extracted word in format of {'c': word text, 'l': lemmatized form}
 
     *Note: a key phrase is collected from a sentence by using treebank-specific grammar on the `xpos` property of each word in a sentence:*
 
@@ -254,10 +256,12 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
 
   Sample input from [PSF](https://www.psf.ca/news-media/238056-granted-16-south-vancouver-island-salmon-community-projects-pacific-salmon), this can be located at `test/nlp_input.txt`
 
-      {
+      [
+        {
           "u":"123",
           "c":"The Pacific Salmon Foundation (PSF) announces grants for 16 projects in the South Vancouver Island region, totalling $238,056 through the PSF Community Salmon Program (CSP). The total value of the projects, which includes community fundraising, contributions and volunteer time, is $1,488,711 and is focused on the rehabilitation of key Pacific salmon habitats and stock enhancement in the South Vancouver Island area."
-      }
+        }
+      ]
 </details>
 
 <details>
@@ -265,7 +269,8 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
 
   Sample output from processing of the above input.
 
-    {
+    [
+      {
        "p" : {
           "et" : [
              {
@@ -476,7 +481,8 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
           ]
        },
        "u" : "123"
-    }
+     }
+    ]
 </details>
 
 ##### Limitations:
