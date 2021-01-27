@@ -91,7 +91,7 @@ Open the browser, go to http://localhost:7474, enter username (neo4j) and passwo
 and follow the instructions on the screen.
 
 
-##### 2. Setting up the Dockers:
+##### 3. Setting up the Dockers:
 The dockers can be managed via several steps:
 - Obtain the dockers by pulling the docker images from Docker Hub.
 - Stop the running containers
@@ -146,7 +146,7 @@ You can also stop it from the other Terminal (in `pskgi_poc` directory):
 
 </details>
 
-##### 3. Using the Dockers:
+##### 4. Using the Dockers:
 
 Instructions to use and/or monitor following dockers:
 - `nlp`
