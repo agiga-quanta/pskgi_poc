@@ -212,6 +212,12 @@ Open the brower, go to http://localhost:7474, enter username (neo4j) and passwor
 
     docker-compose up --build show
 
+  Open the brower, go to http://localhost:7474, enter username (neo4j) and password (pskgi), type the below and press `[Ctrl/Cmd]+Enter`:
+
+    :play http://localhost:8001/html/show.html
+
+  and follow the instructions on the screen.
+
 </details>
 
 ### C. Micro Service Architecture
