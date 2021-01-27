@@ -1,9 +1,9 @@
 #!/bin/bash
 
-cd nlp
+cd $1
 
-docker build -t nghiadh/nlp:0.1.0 .
-docker push nghiadh/nlp:0.1.0
+docker build -t nghiadh/$1:$2 .
+docker push nghiadh/$1:$2
 docker image prune -f
 
 cd ..

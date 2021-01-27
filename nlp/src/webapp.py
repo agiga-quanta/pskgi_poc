@@ -7,7 +7,7 @@ __status__ = "Development"
 
 
 from itertools import groupby
-from typing import List, Optional
+from typing import List
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -19,7 +19,7 @@ from post_nlp import PostProcessor
 
 ####################
 # Reading configuration from given file in relative path
-config = ConfigHandler('conf/app.ini')
+config = ConfigHandler('conf/nlp.ini')
 
 ####################
 # Create an instance of the post processor
@@ -37,10 +37,10 @@ nlp = stanza.Pipeline(language)
 ####################
 # Define the document model that the webapp receives from submission:
 # It is a json format:
-# {
+# [
 #   "u": the uid of the document, the webapp retains and returns it
 #   "c": the textual content of the document.
-# }
+# ]
 class Item(BaseModel):
     u: str
     c: str
@@ -58,15 +58,19 @@ async def root():
 
 ####################
 # The main entry:
-# - receives the document in `BaseModel` format
+# - receives a list of documents based on `BaseModel` format
 # - send it content to `nlp` processing pipeline
 # - post-processing with the PostProcessor instance
 # - return to the sender processed content in following format
-# {
-#   "u": the uid of the document
-#   "p": the processed content, see PostProcessor for more information
-# }
+# [
+#   {
+#       "u": the uid of the document
+#       "p": the processed content, see PostProcessor for more information
+#   }
+# ]
 @app.post("/process/")
-async def process(item: Item):
-    document = nlp(item.c)
-    return {'u': item.u, 'p': post_processor.process(document)}
+async def process(item_list: List[Item]):
+    return [
+        {'u': item.u, 'p': post_processor.process(nlp(item.c))}
+        for item in item_list
+    ]

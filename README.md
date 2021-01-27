@@ -68,6 +68,10 @@ Check out the [repo](https://github.com/nghia71/pskgi_poc) by opening a Terminal
     git clone https://github.com/nghia71/pskgi_poc.git
     cd pskgi_poc
 
+Collect addtional libraries for `neo4j`:
+
+    ./gather_neo4j_plugins.sh
+
 </details>
 
 ##### 2. Setting up the Dockers:
@@ -129,6 +133,8 @@ You can also stop it from the other Terminal (in `pskgi_poc` directory):
 
 Instructions to use and/or monitor following dockers:
 - `nlp`
+- `neo4j`
+- `show`
 
 <details><summary>Click for details!</summary>
 
@@ -140,13 +146,13 @@ Assume that you are in `pskgi_poc` directory, check if it's running:
 
 **For macOS, Linux**
 
-    ./check_nlp.sh
+    ./check_nlp.sh http://127.0.0.1:8000/
 
 **For Windows**
 
 Assume that you are in `pskgi_poc` directory, check if it's running:
 
-    check_nlp.bat
+    check_nlp.bat http://127.0.0.1:8000/
 
 If the script prints `"OK"`, the service is ready, then test it with proper input. You should see `json` output on the console.
 
@@ -163,15 +169,68 @@ If the script prints `"OK"`, the service is ready, then test it with proper inpu
 
 *Note 2: see the Input and Output sections of the Natural Language Processing (NLP) micro service for more details*
 
+##### b. `neo4j`:
+
+Assume that you are in `pskgi_poc` directory, check if it's running:
+
+    cd test
+
+**For macOS, Linux**
+
+    ./data_tasks.sh t neo4j neo4j pskgi bolt://localhost:7687/
+
+**For all OS**
+
+You can start a browser and points it at http://localhost:7474/.
+
+*Note 1: the `neo4j` docker is accessible from anywhere if the host's IP and port 7474 is reachable.*
+
+Create a new set of unique constraints and indexes defined in a `Cypher Query Language` (`cql`) script, which is placed in the local `cql/` directory.
+
+    ./data_tasks.sh a neo4j neo4j pskgi bolt://localhost:7687 cql/nlp_schema.cql
+
+Import data from a `xlsx` formatted data file, placed in `import/` directory, for example `input.xlsx`. There is no need for prefix `import/` since `neo4j` will see it at the mounted volume inside the container.
+
+    ./data_tasks.sh j neo4j neo4j pskgi bolt://localhost:7687 /input.xlsx psf_news\!A1:B6 http://nlp:8000/process/
+
+Open the brower, go to http://localhost:7474, enter username (neo4j) and password (pskgi), type the below and press `[Ctrl/Cmd]+Enter`:
+
+    MATCH (e:NE)-[:E_IN_S]->(s)<-[:E_IN_S]-(loc:LOC)-[:W_IN_E]-(w:LW)
+      WHERE e.c IN ["Coho", "Chinook", "Chum", "Sockeye"] AND w.l = "river"
+    WITH e, loc
+      MATCH (e)-[:E_IN_D]->(d)<-[:K_IN_D]-(k:KP)-[:W_IN_K]-(w:LW)
+        WHERE w.l IN ["habitat", "project", "grant"]
+    WITH DISTINCT(d) AS d, e, COLLECT(DISTINCT(loc)) AS oc, COLLECT(DISTINCT(k)) AS kc
+    RETURN DISTINCT(e) AS species, COLLECT([d, oc, kc]) AS mentioned_locations;
+
+![Match locations, key phrases related to salmons in projects or grants](img/graph.png)
+
+##### c. `show`:
+
+  A simple docker, to host the interactive slideshow.
+
+    docker-compose pull
+    docker-compose up --no-build
+
+  To build this docker:
+
+    docker-compose up --build show
+
+  Open the brower, go to http://localhost:7474, enter username (neo4j) and password (pskgi), type the below and press `[Ctrl/Cmd]+Enter`:
+
+    :play http://localhost:8001/html/show.html
+
+  and follow the instructions on the screen.
+
 </details>
 
-### C. System Architecture
+### C. Micro Service Architecture
 
-*TBA*
+![Docker services](img/docker-compose.png)
 
-### D. Components
+### D. Services
 
-#### 1. Natural Language Processing (NLP) micro service
+#### 1. Natural Language Processing (NLP) as micro service
 
 This NLP micro service (`nlp`) is to provide an internal feature that:
 - accept `human language text` in plain textual Unicode format with UTF-8 encoding.
@@ -206,7 +265,7 @@ How input is submitted to `nlp`:
 - `named entities` (18 named entity types
 described [here](https://stanfordnlp.github.io/stanza/available_models.html).
 - `noun phrases` based on given *treebank annotations* that is configurable
-in *conf/app.ini*, section *key_phrase*, entry *grammar*.
+in *conf/nlp.ini*, section *key_phrase*, entry *grammar*.
 
 <details><summary>Click for details!</summary>
 
@@ -220,26 +279,28 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
   Processed document is represented by a list of sentences, each is a dictionary:
 
       {
-          'ot': the original text of the sentence,
-          'sm': the sentiment score (0, 1, 2), as a string,
-          'et': list of extracted entities (see below),
-          'kp': list of extracted key phrases, for format see below
+          't': the original text of the sentence,
+          's': the sentiment score (0, 1, 2), as a string,
+          'e': list of extracted entities (see below),
+          'k': list of extracted key phrases, for format see below
       }
 
-  Extracted entities of a document is a list of dictionaries:
+    Extracted entities of a document is a list of dictionaries:
 
       {
-          't': the entity type, one of the 18 named entity types, e.g. PERSON
-          'c': the textual content, for example `First Nations`
-          'l': list of lemmatized forms of the entity's words
+          't': the entity type, one of the 18 named entity types, e.g. PERSON,
+          'c': the textual content, for example `First Nations`,
+          'w': list of words, each is a dictionary, see below
       }
 
-  Extracted key phrases of a sentence is a list of dictionaries:
+    Extracted key phrases of a sentence is a list of dictionaries:
 
-    {
-        'c': the textual content, e.g. `restoration stock assessment activities`
-        'l': lemmatized forms, e.g ['restoration', 'stock', 'assessment', 'activity']
-    }
+      {
+          'c': the textual content, e.g. `restoration stock assessment activities`
+          'w': list of words, each is a dictionary, see below
+      }
+
+    Extracted word in format of {'c': word text, 'l': lemmatized form}
 
     *Note: a key phrase is collected from a sentence by using treebank-specific grammar on the `xpos` property of each word in a sentence:*
 
@@ -254,10 +315,12 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
 
   Sample input from [PSF](https://www.psf.ca/news-media/238056-granted-16-south-vancouver-island-salmon-community-projects-pacific-salmon), this can be located at `test/nlp_input.txt`
 
-      {
+      [
+        {
           "u":"123",
           "c":"The Pacific Salmon Foundation (PSF) announces grants for 16 projects in the South Vancouver Island region, totalling $238,056 through the PSF Community Salmon Program (CSP). The total value of the projects, which includes community fundraising, contributions and volunteer time, is $1,488,711 and is focused on the rehabilitation of key Pacific salmon habitats and stock enhancement in the South Vancouver Island area."
-      }
+        }
+      ]
 </details>
 
 <details>
@@ -265,7 +328,8 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
 
   Sample output from processing of the above input.
 
-    {
+    [
+      {
        "p" : {
           "et" : [
              {
@@ -476,7 +540,8 @@ in *conf/app.ini*, section *key_phrase*, entry *grammar*.
           ]
        },
        "u" : "123"
-    }
+     }
+    ]
 </details>
 
 ##### Limitations:
@@ -486,3 +551,90 @@ Following features are not included:
 3. Dependency-parsing (that builds a tree structure of words from the input sentence, which represents the syntactic dependency relations between words)
 4. Enabling GPU usage inside container for better ML performance.
 5. Configurable parallel processing and throughput for higher performance.
+
+#### 2. Neo4j graph database as micro service
+
+`Neo4j` Graph Database CE (Community Edition), `4.2.2` is assembled inside `docker-compose.yml`. Following additional features are added
+- Graph Data Science ([GPS](https://neo4j.com/developer/graph-data-science/)) library, version `1.4.1`.
+- Awesome Procedures On Cypher ([APOC](https://neo4j.com/labs/apoc/)) library, version `4.2.0.1`.
+- A set of `Apache` `POI` and dependency for [importing Excel](https://neo4j.com/labs/apoc/4.2/import/xls/) spreadsheets in both `xls` and `xlsx` format.
+
+All required libraries must be downloaded prior to start the `neo4j` docker by running:
+
+    ./gather_neo4j_plugins.sh
+
+The libraries are placed in the local `plugins/` directory, which will be mounted as a local folder for `neo4j` docker.
+
+- `neo4j` docker image based on `neo4j:4.2.2` in Docker Hub and configured:
+  + automatically accept user license
+  + use max 2GB memory for heap, 1GB for page cache
+  + import files from the mounted local `import/` directory
+  + load additional libraries from the mounted local `plugins/` directory
+  + keeps the physical database files in the mounted local `data/` directory
+  + generates log entires in the `debug.log` file in the mounted local `logs/` directory
+
+##### Running tasks
+Several tasks can be executed with `neo4j` service, to see what you can do, try:
+
+    ./data_tasks.sh
+
+You should see the following print out:
+
+```
+Usage: ./data_tasks.sh <COMMANDS> <NEO4J_CONTAINER> <USER_NAME> <PASSWORD> <BOLT_URL>
+  COMMAND:
+      a: add new schema (unique constraints & indexes)
+      j: nlp and import json file (inside import/ directory)
+      x: nlp and import data xls(x) file (inside import/ directory)
+      c: clean up by remove all nodes and relationships
+      r: remove schema
+      s: print database statistics
+      t: test if database ready
+  EXAMPLES:
+      ./data_tasks.sh t: test if database ready
+      ./data_tasks.sh a: add new schema
+      ./data_tasks.sh j: nlp and import json file
+      ./data_tasks.sh x: nlp and import data xls(x) file
+      ./data_tasks.sh c: clear database
+      ./data_tasks.sh r: remove schema
+      ./data_tasks.sh cr: run an c -> r pipeline
+      ./data_tasks.sh s: print database statistics
+  NEO4J_CONTAINER: the name of the running container, e.g. neo4j
+  USER_NAME: username to access neo4j database, e.g neo4j
+  PASSWORD: password to access neo4j database, e.g pskgi
+  BOLT_URL: Bolt-based URL to access neo4j database, e.g bolt://localhost:7687
+  EXAMPLES:
+      ./data_tasks.sh t neo4j neo4j pskgi bolt://localhost:7687
+```
+
+<details><summary>Click for details!</summary>
+
+Test if `neo4j` docker container is running:
+
+    ./data_tasks.sh t neo4j neo4j pskgi bolt://localhost:7687
+
+[Optional] Clear - remove all nodes and relationships from - the database (note that this might slow down for large database):
+
+    ./data_tasks.sh c neo4j neo4j pskgi bolt://localhost:7687
+
+[Optional] Remove all unique constraints and indexes from the database :
+
+    ./data_tasks.sh r neo4j neo4j pskgi bolt://localhost:7687
+
+[Optional] Create a new set of unique constraints and indexes defined in a `Cypher Query Language` (`cql`) script, which is placed in the local `cql/` directory. Note that this needs to be done only once and before any data import
+
+    ./data_tasks.sh a neo4j neo4j pskgi bolt://localhost:7687 cql/nlp_schema.cql
+
+Import data from a `json` formatted data file, placed in `import/` directory, for example `input.json`. There is no need for prefix `import/` since `neo4j` will see it at the mounted volume inside the container. Note that
+the `nlp` service is access at the URL http://nlp:8000/process/. `neo4j` and `nlp` services communicate via a private network `backend`, which is not exposed outside, so `neo4j` *sees* `nlp` by its own hostname `nlp`.
+
+    ./data_tasks.sh j neo4j neo4j pskgi bolt://localhost:7687 input.json http://nlp:8000/process/
+
+Import data from a `xlsx` formatted data file, placed in `import/` directory, for example `input.xlsx`. There is no need for prefix `import/` since `neo4j` will see it at the mounted volume inside the container. Note that
+the `nlp` service is access at the URL http://nlp:8000/process/. `neo4j` and `nlp` services communicate via a private network `backend`, which is not exposed outside, so `neo4j` *sees* `nlp` by its own hostname `nlp`.
+
+    ./data_tasks.sh j neo4j neo4j pskgi bolt://localhost:7687 /input.xlsx psf_news\!A1:B6 http://nlp:8000/process/
+
+*Important*: the slash `/` in `/input.xlsx` is mandatory. The `!` in `psf_news\!A1:B6` is to escape the special character `!` in shell command. Note that the `psf_news\!A1:B6` is considered as a input sheet. Line numbers starts at 0, so `psf_news\!A1:B6` means to use cells from the region `A2:B6` in the Excel file.
+
+</details>

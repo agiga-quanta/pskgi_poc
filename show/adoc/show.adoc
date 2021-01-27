@@ -1,0 +1,327 @@
+= Show case
+
+== Pacific Salmon Knowledge Graph Initiative - Proof of Concept
+
+DFO’s Pacific Salmon Strategy (PSS) is a multi-branch initiative that seeks to transform the governance, management and assessment of salmon in the Pacific Region. Those leading this initiative, which is anticipated to begin in earnest in 2021, recognize the potential of applying Knowledge Graph (KG) (or labelled property graph, e.g. Neo4j.com) technology to assist in the assembly, storage and interpretation of complex salmon-related data and information.
+
+One focus of the initiative is on information pertaining to current salmon rebuilding activities, building upon earlier KG work, including some that focused on southern BC Chinook salmon.
+
+This Proof of Concept (PoC) is intended to demonstrate the value of KG technology as a means of helping to achieve the overall goals of the PSS by showcasing data processing procedures for assembly, cleaning, transformation (standardization), loading, and linking of data from text sources (e.g. reports, Word documents and Excel spreadsheets) into nodes and links in a Salmon Knowledge Graph.
+
+== Pacific Salmon Foundation
+
+image::https://www.psf.ca/sites/all/themes/salmon/logo.png[width=50,float=left]
+
+The Pacific Salmon Foundation, founded in 1987, is a federally incorporated non-profit charitable organization dedicated to the conservation and restoration of wild Pacific salmon and their natural habitats in British Columbia and the Yukon.  Operating independently from government, The Foundation facilitates dialogue and undertakes positive initiatives in support of Pacific salmon amongst all levels of government including First Nations; as well as industry, communities, individual volunteers and all fishing interests.
+
+Our Manifesto
+
+The Pacific Salmon Foundation exists to support ‘salmon communities’ in their efforts, promote awareness of this keystone species, and guide the sustainable future of wild Pacific salmon and their habitat.
+We are a catalyst – working to accelerate the regeneration of wild Pacific salmon, an invaluable natural resource.
+We steward the investment of our available resources – both human and financial – to optimize our collective return. We are a vocal advocate, speaking as the voice of the salmon community to articulate the issues affecting our mandate.
+With ongoing education, partnership and collaboration, we will positively transform people’s outlook to realize the connection wild Pacific salmon have with everything that is British Columbia.
+
+++++
+<div class="responsive-embed">
+<iframe width="560" height="315" src="https://www.youtube.com/embed/3x8rqXlSBKI?showinfo=0&controls=2&autohide=1" frameborder="0" allowfullscreen></iframe>
+</div>
+++++
+
+== Preparing the environment
+
+Follow instructions on https://github.com/nghia71/pskgi_poc/blob/main/README.md[README.md]:
+
+- to install prerequisite software on the target system
+- get all the dockers (nlp, neo4j, show) up and running
+
+Sample data from these news articles:
+
+- https://www.psf.ca/news-media/76000-granted-tofino-and-ucluelet-community-salmon-projects-pacific-salmon-foundation[$76,000 granted to Tofino and Ucluelet Community Salmon projects by the Pacific Salmon Foundation]
+- https://www.psf.ca/news-media/24000-granted-oceanside-community-salmon-projects-pacific-salmon-foundation[$24,000 granted to Parksville Qualicum Beach projects via Pacific Salmon Foundation]
+- https://www.psf.ca/news-media/56900-granted-powell-river-community-salmon-projects-pacific-salmon-foundation[$56,900 granted to Powell River Community Salmon projects by the Pacific Salmon Foundation]
+- https://www.psf.ca/news-media/29000-granted-pacific-salmon-foundation-“heart-fraser”-study[$29,000 granted by Pacific Salmon Foundation for “Heart of the Fraser” Study]
+- https://www.psf.ca/news-media/162000-granted-12-central-and-north-coast-salmon-community-projects-pacific-salmon[$162,000 granted to 12 Central and North Coast Salmon Community Projects by Pacific Salmon Foundation]
+
+The sample content is assembled into `input.xlsx` and placed into `import/` local directory.
+
+== Adding unique constraints and indexes
+
+Unique node property constraints:
+- Unique property constraints ensure that property values are unique for all nodes with a specific label. Unique constraints do not mean that all nodes have to have a unique value for the properties — nodes without the property are not subject to this rule.
+
+Cypher enables the creation of indexes on one or more properties for all nodes that have a given label:
+- An index that is created on a single property for any given label is called a single-property index.
+- An index that is created on more than one property for any given label is called a composite index.
+
+1. Create unique constraint
+`CREATE CONSTRAINT ON (n:Label) ASSERT n.property IS UNIQUE;`
+
+2. Create a single-property index
+`CREATE INDEX ON :Label(property);`
+
+3. Create a composite index
+`CREATE INDEX ON :Label(prop1, …​, propN);`
+
+4. Create node property existence constraint
+`CREATE CONSTRAINT ON (n:Label) ASSERT EXISTS(n.property);`
+
+5. Create relationship property existence constraint
+`CREATE CONSTRAINT ON ()-[r:relationshipType]-() ASSERT EXISTS(r.property);`
+
+6. Create a Node Key
+`ASSERT (variable.propertyName_1, …​, variable.propertyName_n) IS NODE KEY;`
+
+[source,cypher]
+----
+//
+// Document
+// - uid: the unique identifier of a document (e.g. file name)
+CREATE CONSTRAINT ON (n:D) ASSERT n.uid IS UNIQUE;
+
+// Sentence
+// - c is the textual content, it is unique and indexed
+CREATE CONSTRAINT ON (n:S) ASSERT n.c IS UNIQUE;
+// - s is the sentiment score, it is an indexed integer
+CREATE INDEX ON :S(s);
+// - n is the numner of occurences of the sentence
+CREATE INDEX ON :S(n);
+
+// Named Entity
+// - c is the textual content, it is unique and indexed
+CREATE CONSTRAINT ON (n:NE) ASSERT n.c IS UNIQUE;
+// - n is the number of occurrences of the entity
+CREATE INDEX ON :NE(n);
+
+// - the entity type label (18 named entity types, e.g. PERSON)
+CREATE CONSTRAINT ON (n:CARDINAL) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:DATE) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:EVENT) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:FAC) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:GPE) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:LAW) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:LANGUAGE) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:LOC) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:MONEY) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:NORP) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:ORDINAL) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:ORG) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:PERCENT) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:PERSON) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:PRODUCT) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:QUANTITY) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:TIME) ASSERT n.c IS UNIQUE;
+CREATE CONSTRAINT ON (n:WORK_OF_ART) ASSERT n.c IS UNIQUE;
+
+// Key Phrase
+// - c is the textual content, it is unique and indexed
+CREATE CONSTRAINT ON (n:KP) ASSERT n.c IS UNIQUE;
+// - n is the numner of occurences of the key phrase
+CREATE INDEX ON :KP(n);
+
+// Lemmatized word
+// - l is the lemma form of the text, it is unique and indexed
+CREATE CONSTRAINT ON (n:LW) ASSERT n.l IS UNIQUE;
+// - n is the numner of occurences of the key phrase
+CREATE INDEX ON :LW(n);
+
+// List all constraints
+CALL db.constraints();
+
+// List all indexes
+CALL db.indexes();
+
+// Wait for all indexes online
+CALL db.awaitIndexes();
+----
+
+*Notes:*
+
+- `(d:D)-[:HAS_NE {n: 2}]->(e:E)` means that the entity appears twice in the document
+- `(d:D)-[:HAS_KP {n: 2}]->(k:KP)` means that the key phrase appears twice in the sentence
+- `(e:E)-[:HAS_LW {c: "communities"}]->(w:Word {l: "community"})` means the word "communities" appears in the entity and stored as lemmatized
+- `(k:KP)-[:HAS_LW {c: "communities"}]->(w:Word {l: "community"})` means the word "communities" appears in the entity and stored as lemmatized
+
+== Import data
+
+It is a simple pipeline that:
+- reads data from an `Excel` spreadsheet containing plain text cells
+- encapsulates it into a list of documents in `json` format
+- natural language processes the documents, extracts `named entities`, `key phrases`, their `words` and `lemmatized forms`
+- persists extracted data into the `neo4j` database instance
+
+[source,cypher]
+----
+//
+// Define parameters
+//
+:param xls_file => "/input.xlsx";
+:param sheets => "psf_news!A1:B6";
+:param nlp_service => "http://nlp:8000/process/";
+
+//
+// Load the xls(x) file from the import/ directory
+//
+UNWIND SPLIT($sheets,'#') AS sheet
+WITH sheet
+CALL apoc.load.xls($xls_file, sheet)
+  YIELD list
+WITH COLLECT(list) AS pairs
+WITH [p IN pairs | apoc.map.fromLists(["u", "c"], p)] AS input
+
+//
+// Call the nlp micro service to process the documents.
+//
+WITH input CALL apoc.load.jsonParams($nlp_service, {method: "POST"}, apoc.convert.toJson(input))
+  YIELD value
+WITH value
+UNWIND value AS document
+
+//
+// Process each document and its sentences
+// - create a D node with given uid AS key
+// - create an S node for each sentence, update counter
+//
+WITH document
+MERGE (d:D {uid: document.u})
+WITH d, document
+UNWIND document.p AS sentence
+WITH d, sentence
+MERGE (s:S {c: sentence.c})
+  ON CREATE SET s.n = 0, s.s = sentence.s
+  ON MATCH SET s.n = s.n + 1
+MERGE (d)<-[r:S_IN_D]-(s)
+  ON CREATE SET r.n = 0
+  ON MATCH SET r.n = r.n + 1
+
+//
+// Process all entities of each sentence
+// - create an NE node for each entity, update counter
+// - add label (entity type) to the node
+// - create list of LW nodes for lemmatized words, link them with the entity
+//
+WITH d, s, sentence
+UNWIND sentence.e AS entity
+WITH d, s, sentence, entity
+MERGE (e:NE {c: entity.c})
+  ON CREATE SET e.n = 0
+  ON MATCH SET e.n = e.n + 1
+MERGE (s)<-[:E_IN_S]-(e)
+MERGE (d)<-[r:E_IN_D]-(e)
+  ON CREATE SET r.n = 0
+  ON MATCH SET r.n = r.n + 1
+WITH d, s, sentence, e, entity
+CALL apoc.create.addLabels(e, [entity.t]) YIELD node
+WITH d, s, sentence, node AS e, entity
+UNWIND entity.w AS word
+  MERGE (w:LW {l: word.l})
+    ON CREATE SET w.n = 0
+    ON MATCH SET w.n = w.n + 1
+  MERGE (e)<-[r:W_IN_E]-(w)
+
+//
+// Process all key phrases of each sentence
+// - create an KP node for each entity, update counter
+// - create list of LW nodes for lemmatized words, link them with the entity
+//
+WITH d, s, sentence
+UNWIND sentence.k AS key_phrase
+WITH d, s, sentence, key_phrase
+OPTIONAL MATCH (e:NE {c: key_phrase.c})
+WITH d, s, sentence, key_phrase, e
+FOREACH (_ IN CASE WHEN e IS NOT NULL THEN [1] ELSE [0] END |
+  SET e:KP
+)
+WITH d, s, sentence, key_phrase
+MERGE (k:KP {c: key_phrase.c})
+  ON CREATE SET k.n = 0
+  ON MATCH SET k.n = k.n + 1
+MERGE (s)<-[:K_IN_S]-(k)
+MERGE (d)<-[r:K_IN_D]-(k)
+  ON CREATE SET r.n = 0
+  ON MATCH SET r.n = r.n + 1
+WITH d, s, sentence, k, key_phrase
+UNWIND key_phrase.w AS word
+  MERGE (w:LW {l: word.l})
+    ON CREATE SET w.n = 0
+    ON MATCH SET w.n = w.n + 1
+  MERGE (k)<-[r:W_IN_K]-(w)
+    ON CREATE SET r.c = word.c;
+
+//
+// Process all key phrases of each sentence
+// - Link with an Named Entity if it appears inside the key phrase
+//
+MATCH (k:KP)-[:K_IN_S]->(s)
+WITH k, s
+MATCH (s)<-[:E_IN_S]-(e:NE)
+  WHERE e.c CONTAINS k.c AND e.c <> k.c AND SIZE((e)<-[:K_IN_E]-(k)) = 0
+MERGE (e)<-[:K_IN_E]-(k);
+//
+// Similarly for named entities
+//
+MATCH (e:NE)-[:K_IN_S]->(s)
+WITH e, s
+MATCH (s)<-[:E_IN_S]-(oe:NE)
+  WHERE oe.c CONTAINS e.c AND oe.c <> e.c AND SIZE((oe)<-[:E_IN_E]-(e)) = 0
+MERGE (oe)<-[:E_IN_E]-(e);
+----
+
+== Statistics and the meta graph
+
+Overall statistics
+
+[source,cypher]
+----
+CALL apoc.meta.stats() YIELD labelCount, relTypeCount, propertyKeyCount, nodeCount, relCount, labels, relTypes, stats
+RETURN stats;
+----
+
+The meta graph
+
+[source,cypher]
+----
+CALL apoc.meta.graph();
+----
+
+== Querying Data
+We are looking for document contexts where:
+
+- specified salmon species appear in location containing `river`
+- and words like habitat, project, grant should also appear
+
+Salmon species: Coho, Chinook, Chum, Sockeye
+
+[source,cypher]
+----
+MATCH (e:NE)-[:E_IN_S]->(s)<-[:E_IN_S]-(loc:LOC)-[:W_IN_E]-(w:LW)
+  WHERE e.c IN ["Coho", "Chinook", "Chum", "Sockeye"] AND w.l = "river"
+WITH e, loc
+  MATCH (e)-[:E_IN_D]->(d)<-[:K_IN_D]-(k:KP)-[:W_IN_K]-(w:LW)
+  WHERE w.l IN ["habitat", "project", "grant"]
+WITH DISTINCT(d) AS d, e, COLLECT(DISTINCT(loc)) AS oc, COLLECT(DISTINCT(k)) AS kc
+RETURN DISTINCT(e) AS species, COLLECT([d, oc, kc]) AS mentioned_locations
+----
+
+== Cleanup
+
+Clear the database (note that these are not optimal for large size database)
+
+[source,cypher]
+----
+MATCH (a)-[r]->() DELETE a, r;
+MATCH (a) DELETE a;
+----
+
+Remove constraints and indexes
+`apoc.schema.assert` add neither constraints nor indexes and drop all existing ones
+
+[source,cypher]
+----
+CALL apoc.schema.assert(NULL, NULL, TRUE);
+----
+
+== Thank you
+
+All questions, comments, suggestions are welcome!
+
+Thank you!
