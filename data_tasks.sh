@@ -32,6 +32,24 @@ res1=$(date +%s)
 
 commands=$1
 
+if [[ $commands == *"t"* ]]; then
+  printf "Test if neo4j database is ready ...\n"
+  (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5) < cql/test_db.cql
+  printf "Done.\n"
+fi
+
+if [[ $commands == *"c"* ]]; then
+  printf "Clear database ...\n"
+  (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5) < cql/clear_db.cql
+  printf "Done.\n"
+fi
+
+if [[ $commands == *"r"* ]]; then
+  printf "Remove schema ...\n"
+  (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5) < cql/remove_schema.cql
+  printf "Done.\n"
+fi
+
 if [[ $commands == *"a"* ]]; then
   if [ $# -lt 6 ]; then
     echo "Usage: ./data_tasks.sh n <NEO4J_CONTAINER> <USER_NAME> <PASSWORD> <BOLT_URL> <SCHEMA_FILE>"
@@ -57,32 +75,15 @@ fi
 
 if [[ $commands == *"x"* ]]; then
   if [ $# -lt 6 ]; then
-    echo "Usage: ./data_tasks.sh n <NEO4J_CONTAINER> <USER_NAME> <PASSWORD> <BOLT_URL> <XLS_FILE> <NLP_SERVICE>"
+    echo "Usage: ./data_tasks.sh n <NEO4J_CONTAINER> <USER_NAME> <PASSWORD> <BOLT_URL> <XLS_FILE> <SHEETS> <NLP_SERVICE>"
     echo "  XLS_FILE: the full name of the xls(x) file (inside import/ directory)"
-    echo "  NLP_SERVICE: the URL of the NLP micro service, e.g. http://localhost:8000/process/"
+    echo "  SHEETS: list of sheets separated by ';', e.g. Sheet1;Sheet2, or psf_news\!A2:B6 (note the \ for escaping special character '!')"
+    echo "  NLP_SERVICE: the URL of the NLP micro service, e.g. http://nlp:8000/process/"
   else
     printf "Import from xls(x) file ...\n"
-    (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5 -P "xls_file => \"$6\"" -P "nlp_service => \"$7\"") < cql/import_xls.cql
+    (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5 -P "xls_file => \"$6\"" -P "sheets => \"$7\"" -P "nlp_service => \"$8\"") < cql/import_xls.cql
     printf "Done.\n"
   fi
-fi
-
-if [[ $commands == *"c"* ]]; then
-  printf "Clear database ...\n"
-  (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5) < cql/clear_db.cql
-  printf "Done.\n"
-fi
-
-if [[ $commands == *"r"* ]]; then
-  printf "Remove schema ...\n"
-  (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5) < cql/remove_schema.cql
-  printf "Done.\n"
-fi
-
-if [[ $commands == *"t"* ]]; then
-  printf "Test if neo4j database is ready ...\n"
-  (docker exec -i $2 /var/lib/neo4j/bin/cypher-shell -u $3 -p $4 -a $5) < cql/test_db.cql
-  printf "Done.\n"
 fi
 
 if [[ $commands == *"s"* ]]; then
