@@ -4,8 +4,9 @@
 UNWIND SPLIT($sheets,'#') AS sheet
 WITH sheet
   CALL apoc.load.xls($xls_file, sheet)
-    YIELD lineNo, list, map
-WITH list AS input
+    YIELD list
+WITH COLLECT(list) AS pairs
+WITH [p IN pairs | apoc.map.fromLists(["u", "c"], p)] AS input
 ////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////
