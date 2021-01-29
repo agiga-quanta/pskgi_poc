@@ -346,218 +346,564 @@ in *conf/nlp.ini*, section *key_phrase*, entry *grammar*.
   Sample output from processing of the above input.
 
     [
-      {
-       "p" : {
-          "et" : [
-             {
-                "c" : "The Pacific Salmon Foundation (PSF)",
-                "l" : [
-                   "the",
-                   "pacific",
-                   "salmon",
-                   "foundation",
-                   "(",
-                   "psf",
-                   ")"
-                ],
-                "t" : "ORG"
-             },
-             {
-                "c" : "16",
-                "l" : [
-                   "16"
-                ],
-                "t" : "CARDINAL"
-             },
-             {
-                "c" : "South Vancouver Island",
-                "l" : [
-                   "south",
-                   "vancouver",
-                   "island"
-                ],
-                "t" : "LOC"
-             },
-             {
-                "c" : "238,056",
-                "l" : [
-                   "238,056"
-                ],
-                "t" : "MONEY"
-             },
-             {
-                "c" : "the PSF Community Salmon Program",
-                "l" : [
-                   "the",
-                   "psf",
-                   "community",
-                   "salmon",
-                   "program"
-                ],
-                "t" : "ORG"
-             },
-             {
-                "c" : "CSP",
-                "l" : [
-                   "csp"
-                ],
-                "t" : "ORG"
-             },
-             {
-                "c" : "1,488,711",
-                "l" : [
-                   "1,488,711"
-                ],
-                "t" : "MONEY"
-             },
-             {
-                "c" : "Pacific",
-                "l" : [
-                   "pacific"
-                ],
-                "t" : "LOC"
-             },
-             {
-                "c" : "South Vancouver Island",
-                "l" : [
-                   "south",
-                   "vancouver",
-                   "island"
-                ],
-                "t" : "LOC"
-             }
-          ],
-          "st" : [
-             {
-                "kp" : [
-                   {
-                      "c" : "Pacific Salmon Foundation",
-                      "l" : [
-                         "pacific",
-                         "salmon",
-                         "foundation"
-                      ]
-                   },
-                   {
-                      "c" : "PSF",
-                      "l" : [
-                         "psf"
-                      ]
-                   },
-                   {
-                      "c" : "grants",
-                      "l" : [
-                         "grant"
-                      ]
-                   },
-                   {
-                      "c" : "projects",
-                      "l" : [
-                         "project"
-                      ]
-                   },
-                   {
-                      "c" : "South Vancouver Island region",
-                      "l" : [
-                         "south",
-                         "vancouver",
-                         "island",
-                         "region"
-                      ]
-                   },
-                   {
-                      "c" : "PSF Community Salmon Program",
-                      "l" : [
-                         "psf",
-                         "community",
-                         "salmon",
-                         "program"
-                      ]
-                   },
-                   {
-                      "c" : "CSP",
-                      "l" : [
-                         "csp"
-                      ]
-                   }
-                ],
-                "ot" : "The Pacific Salmon Foundation (PSF) announces grants for 16 projects in the South Vancouver Island region, totalling $238,056 through the PSF Community Salmon Program (CSP).",
-                "sm" : 1
-             },
-             {
-                "kp" : [
-                   {
-                      "c" : "total value",
-                      "l" : [
-                         "total",
-                         "value"
-                      ]
-                   },
-                   {
-                      "c" : "projects",
-                      "l" : [
-                         "project"
-                      ]
-                   },
-                   {
-                      "c" : "community fundraising",
-                      "l" : [
-                         "community",
-                         "fundraising"
-                      ]
-                   },
-                   {
-                      "c" : "contributions",
-                      "l" : [
-                         "contribution"
-                      ]
-                   },
-                   {
-                      "c" : "volunteer time",
-                      "l" : [
-                         "volunteer",
-                         "time"
-                      ]
-                   },
-                   {
-                      "c" : "rehabilitation",
-                      "l" : [
-                         "rehabilitation"
-                      ]
-                   },
-                   {
-                      "c" : "key Pacific salmon habitats",
-                      "l" : [
-                         "key",
-                         "pacific",
-                         "salmon",
-                         "habitat"
-                      ]
-                   },
-                   {
-                      "c" : "stock enhancement",
-                      "l" : [
-                         "stock",
-                         "enhancement"
-                      ]
-                   },
-                   {
-                      "c" : "South Vancouver Island area",
-                      "l" : [
-                         "south",
-                         "vancouver",
-                         "island",
-                         "area"
-                      ]
-                   }
-                ],
-                "ot" : "The total value of the projects, which includes community fundraising, contributions and volunteer time, is $1,488,711 and is focused on the rehabilitation of key Pacific salmon habitats and stock enhancement in the South Vancouver Island area.",
-                "sm" : 2
-             }
-          ]
-       },
-       "u" : "123"
-     }
+        {
+            "p": [
+                {
+                    "c": "The Pacific Salmon Foundation (PSF) announces grants for 16 projects in the South Vancouver Island region, totalling $238,056 through the PSF Community Salmon Program (CSP).",
+                    "e": [
+                        {
+                            "c": "The Pacific Salmon Foundation (PSF)",
+                            "t": "ORG",
+                            "w": [
+                                {
+                                    "c": "Pacific",
+                                    "l": "pacific"
+                                },
+                                {
+                                    "c": "Salmon",
+                                    "l": "salmon"
+                                },
+                                {
+                                    "c": "Foundation",
+                                    "l": "foundation"
+                                },
+                                {
+                                    "c": "(",
+                                    "l": "("
+                                },
+                                {
+                                    "c": "PSF",
+                                    "l": "psf"
+                                },
+                                {
+                                    "c": ")",
+                                    "l": ")"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "16",
+                            "t": "CARDINAL",
+                            "w": [
+                                {
+                                    "c": "16",
+                                    "l": "16"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "South Vancouver Island",
+                            "t": "LOC",
+                            "w": [
+                                {
+                                    "c": "South",
+                                    "l": "south"
+                                },
+                                {
+                                    "c": "Vancouver",
+                                    "l": "vancouver"
+                                },
+                                {
+                                    "c": "Island",
+                                    "l": "island"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "238,056",
+                            "t": "MONEY",
+                            "w": [
+                                {
+                                    "c": "238,056",
+                                    "l": "238,056"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "PSF Community Salmon Program",
+                            "t": "ORG",
+                            "w": [
+                                {
+                                    "c": "PSF",
+                                    "l": "psf"
+                                },
+                                {
+                                    "c": "Community",
+                                    "l": "community"
+                                },
+                                {
+                                    "c": "Salmon",
+                                    "l": "salmon"
+                                },
+                                {
+                                    "c": "Program",
+                                    "l": "program"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "CSP",
+                            "t": "ORG",
+                            "w": [
+                                {
+                                    "c": "CSP",
+                                    "l": "csp"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "1,488,711",
+                            "t": "MONEY",
+                            "w": [
+                                {
+                                    "c": "1,488,711",
+                                    "l": "1,488,711"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "Pacific",
+                            "t": "LOC",
+                            "w": [
+                                {
+                                    "c": "Pacific",
+                                    "l": "pacific"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "South Vancouver Island",
+                            "t": "LOC",
+                            "w": [
+                                {
+                                    "c": "South",
+                                    "l": "south"
+                                },
+                                {
+                                    "c": "Vancouver",
+                                    "l": "vancouver"
+                                },
+                                {
+                                    "c": "Island",
+                                    "l": "island"
+                                }
+                            ]
+                        }
+                    ],
+                    "k": [
+                        {
+                            "c": "pacific",
+                            "w": [
+                                {
+                                    "c": "pacific",
+                                    "l": "pacific"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "salmon",
+                            "w": [
+                                {
+                                    "c": "salmon",
+                                    "l": "salmon"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "foundation",
+                            "w": [
+                                {
+                                    "c": "foundation",
+                                    "l": "foundation"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "psf",
+                            "w": [
+                                {
+                                    "c": "psf",
+                                    "l": "psf"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "grants",
+                            "w": [
+                                {
+                                    "c": "grants",
+                                    "l": "grant"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "projects",
+                            "w": [
+                                {
+                                    "c": "projects",
+                                    "l": "project"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "south",
+                            "w": [
+                                {
+                                    "c": "south",
+                                    "l": "south"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "vancouver",
+                            "w": [
+                                {
+                                    "c": "vancouver",
+                                    "l": "vancouver"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "island",
+                            "w": [
+                                {
+                                    "c": "island",
+                                    "l": "island"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "region",
+                            "w": [
+                                {
+                                    "c": "region",
+                                    "l": "region"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "psf community salmon program",
+                            "w": [
+                                {
+                                    "c": "psf",
+                                    "l": "psf"
+                                },
+                                {
+                                    "c": "community",
+                                    "l": "community"
+                                },
+                                {
+                                    "c": "salmon",
+                                    "l": "salmon"
+                                },
+                                {
+                                    "c": "program",
+                                    "l": "program"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "csp",
+                            "w": [
+                                {
+                                    "c": "csp",
+                                    "l": "csp"
+                                }
+                            ]
+                        }
+                    ],
+                    "s": 1
+                },
+                {
+                    "c": "The total value of the projects, which includes community fundraising, contributions and volunteer time, is $1,488,711 and is focused on the rehabilitation of key Pacific salmon habitats and stock enhancement in the South Vancouver Island area.",
+                    "e": [
+                        {
+                            "c": "The Pacific Salmon Foundation (PSF)",
+                            "t": "ORG",
+                            "w": [
+                                {
+                                    "c": "Pacific",
+                                    "l": "pacific"
+                                },
+                                {
+                                    "c": "Salmon",
+                                    "l": "salmon"
+                                },
+                                {
+                                    "c": "Foundation",
+                                    "l": "foundation"
+                                },
+                                {
+                                    "c": "(",
+                                    "l": "("
+                                },
+                                {
+                                    "c": "PSF",
+                                    "l": "psf"
+                                },
+                                {
+                                    "c": ")",
+                                    "l": ")"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "16",
+                            "t": "CARDINAL",
+                            "w": [
+                                {
+                                    "c": "16",
+                                    "l": "16"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "South Vancouver Island",
+                            "t": "LOC",
+                            "w": [
+                                {
+                                    "c": "South",
+                                    "l": "south"
+                                },
+                                {
+                                    "c": "Vancouver",
+                                    "l": "vancouver"
+                                },
+                                {
+                                    "c": "Island",
+                                    "l": "island"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "238,056",
+                            "t": "MONEY",
+                            "w": [
+                                {
+                                    "c": "238,056",
+                                    "l": "238,056"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "PSF Community Salmon Program",
+                            "t": "ORG",
+                            "w": [
+                                {
+                                    "c": "PSF",
+                                    "l": "psf"
+                                },
+                                {
+                                    "c": "Community",
+                                    "l": "community"
+                                },
+                                {
+                                    "c": "Salmon",
+                                    "l": "salmon"
+                                },
+                                {
+                                    "c": "Program",
+                                    "l": "program"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "CSP",
+                            "t": "ORG",
+                            "w": [
+                                {
+                                    "c": "CSP",
+                                    "l": "csp"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "1,488,711",
+                            "t": "MONEY",
+                            "w": [
+                                {
+                                    "c": "1,488,711",
+                                    "l": "1,488,711"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "Pacific",
+                            "t": "LOC",
+                            "w": [
+                                {
+                                    "c": "Pacific",
+                                    "l": "pacific"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "South Vancouver Island",
+                            "t": "LOC",
+                            "w": [
+                                {
+                                    "c": "South",
+                                    "l": "south"
+                                },
+                                {
+                                    "c": "Vancouver",
+                                    "l": "vancouver"
+                                },
+                                {
+                                    "c": "Island",
+                                    "l": "island"
+                                }
+                            ]
+                        }
+                    ],
+                    "k": [
+                        {
+                            "c": "total value",
+                            "w": [
+                                {
+                                    "c": "total",
+                                    "l": "total"
+                                },
+                                {
+                                    "c": "value",
+                                    "l": "value"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "projects",
+                            "w": [
+                                {
+                                    "c": "projects",
+                                    "l": "project"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "community fundraising",
+                            "w": [
+                                {
+                                    "c": "community",
+                                    "l": "community"
+                                },
+                                {
+                                    "c": "fundraising",
+                                    "l": "fundraising"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "contributions",
+                            "w": [
+                                {
+                                    "c": "contributions",
+                                    "l": "contribution"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "volunteer time",
+                            "w": [
+                                {
+                                    "c": "volunteer",
+                                    "l": "volunteer"
+                                },
+                                {
+                                    "c": "time",
+                                    "l": "time"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "rehabilitation",
+                            "w": [
+                                {
+                                    "c": "rehabilitation",
+                                    "l": "rehabilitation"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "key pacific",
+                            "w": [
+                                {
+                                    "c": "key",
+                                    "l": "key"
+                                },
+                                {
+                                    "c": "pacific",
+                                    "l": "pacific"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "salmon habitats",
+                            "w": [
+                                {
+                                    "c": "salmon",
+                                    "l": "salmon"
+                                },
+                                {
+                                    "c": "habitats",
+                                    "l": "habitat"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "stock enhancement",
+                            "w": [
+                                {
+                                    "c": "stock",
+                                    "l": "stock"
+                                },
+                                {
+                                    "c": "enhancement",
+                                    "l": "enhancement"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "south",
+                            "w": [
+                                {
+                                    "c": "south",
+                                    "l": "south"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "vancouver",
+                            "w": [
+                                {
+                                    "c": "vancouver",
+                                    "l": "vancouver"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "island",
+                            "w": [
+                                {
+                                    "c": "island",
+                                    "l": "island"
+                                }
+                            ]
+                        },
+                        {
+                            "c": "area",
+                            "w": [
+                                {
+                                    "c": "area",
+                                    "l": "area"
+                                }
+                            ]
+                        }
+                    ],
+                    "s": 2
+                }
+            ],
+            "u": "123"
+        }
     ]
 </details>
 
