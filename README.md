@@ -280,7 +280,7 @@ How input is submitted to `nlp`:
 `nlp` processes the document and extracts for each sentence:
 - `sentiment score`
 - `named entities` (18 named entity types
-described [here](https://stanfordnlp.github.io/stanza/available_models.html).
+described [here](https://stanfordnlp.github.io/stanza/available_models.html)).
 - `noun phrases` based on given *treebank annotations* that is configurable
 in *conf/nlp.ini*, section *key_phrase*, entry *grammar*.
 

@@ -56,7 +56,7 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_jobs_pool_num__threads=4
       - NEO4J_apoc_jobs_scheduled_num__threads=4
-      - NEO4j_browser_remote__content__hostname__whitelist=*
+      - NEO4J_browser_remote__content__hostname__whitelist=*
 
   ####################
   # show:
