@@ -246,24 +246,6 @@ UNWIND key_phrase.w AS word
     ON MATCH SET w.n = w.n + 1
   MERGE (k)<-[r:W_IN_K]-(w)
     ON CREATE SET r.c = word.c;
-
-//
-// Process all key phrases of each sentence
-// - Link with an Named Entity if it appears inside the key phrase
-//
-MATCH (k:KP)-[:K_IN_S]->(s)
-WITH k, s
-MATCH (s)<-[:E_IN_S]-(e:NE)
-  WHERE e.c CONTAINS k.c AND e.c <> k.c AND SIZE((e)<-[:K_IN_E]-(k)) = 0
-MERGE (e)<-[:K_IN_E]-(k);
-//
-// Similarly for named entities
-//
-MATCH (e:NE)-[:K_IN_S]->(s)
-WITH e, s
-MATCH (s)<-[:E_IN_S]-(oe:NE)
-  WHERE oe.c CONTAINS e.c AND oe.c <> e.c AND SIZE((oe)<-[:E_IN_E]-(e)) = 0
-MERGE (oe)<-[:E_IN_E]-(e);
 ----
 
 == Statistics and the meta graph
@@ -283,11 +265,53 @@ The meta graph
 CALL apoc.meta.graph();
 ----
 
-== Querying Data
-We are looking for document contexts where:
+== Post-processing: merging nodes (and their relationships)
 
+Multiple nodes for the same entity appear in the same document:
+
+- `PSF Community Salmon Program`, `The Community Salmon Program`, `CSP`
+
+- `The Pacific Salmon Foundation (PSF)`, `Pacific Salmon Foundation`, `PSF`
+
+[source,cypher]
+----
+MATCH (e:NE:ORG)-[:E_IN_D]->(d)
+	WHERE e.c IN ['PSF Community Salmon Program', 'The Community Salmon Program', 'CSP', 'The Pacific Salmon Foundation (PSF)', 'Pacific Salmon Foundation', 'PSF']
+RETURN e, d;
+----
+
+They can be merged by refactoring. List of terms can easily be configured.
+
+[source,cypher]
+----
+WITH [
+	['PSF Community Salmon Program', ['The Community Salmon Program', 'CSP']],
+	['The Pacific Salmon Foundation (PSF)', ['Pacific Salmon Foundation', 'PSF']]
+] AS same_terms_list
+UNWIND same_terms_list AS same_terms
+WITH same_terms[0] AS first_term, same_terms[1] AS the_rest
+MATCH (e1:NE:ORG {c: first_term})
+WITH e1, the_rest
+	MATCH (e2:NE:ORG)
+		WHERE e2.c IN the_rest
+WITH [e1] + COLLECT(e2) AS nodes
+	CALL apoc.refactor.mergeNodes(nodes, {properties: {c: "discard", n:"combine"}, mergeRels:true})
+		YIELD node
+WITH node
+	SET node.n = TOINTEGER(apoc.coll.sum(node.n))
+WITH node
+	MATCH (node)-[r:E_IN_D]-()
+	FOREACH (_ IN CASE WHEN apoc.meta.cypher.isType(r.n, 'LIST OF INTEGER') THEN [1] ELSE [] END |
+		SET r.n = TOINTEGER(apoc.coll.sum(r.n))
+	)
+RETURN node;
+----
+
+== Querying Data
+
+We are looking for document contexts where:
 - specified salmon species appear in location containing `river`
-- and words like habitat, project, grant should also appear
+- and words like `habitat`, `project`, `grant` should also appear in the document.
 
 Salmon species: Coho, Chinook, Chum, Sockeye
 
@@ -300,6 +324,22 @@ WITH e, loc
   WHERE w.l IN ["habitat", "project", "grant"]
 WITH DISTINCT(d) AS d, e, COLLECT(DISTINCT(loc)) AS oc, COLLECT(DISTINCT(k)) AS kc
 RETURN DISTINCT(e) AS species, COLLECT([d, oc, kc]) AS mentioned_locations
+----
+
+Now, let check what organizations were mentioned in these contexts.
+
+[source,cypher]
+----
+MATCH (e:NE)-[:E_IN_S]->(s)<-[:E_IN_S]-(loc:LOC)-[:W_IN_E]-(w:LW)
+  WHERE e.c IN ["Coho", "Chinook", "Chum", "Sockeye"] AND w.l = "river"
+WITH e, loc
+  MATCH (e)-[:E_IN_D]->(d)<-[:K_IN_D]-(k:KP)-[:W_IN_K]-(w:LW)
+  WHERE w.l IN ["habitat", "project", "grant"]
+WITH DISTINCT(d) AS d, e, COLLECT(DISTINCT(loc)) AS oc, COLLECT(DISTINCT(k)) AS kc
+  MATCH (d)<-[r:E_IN_D]-(o:NE:ORG)
+WITH DISTINCT(o) AS o, COLLECT(DISTINCT(d)) AS dc, COLLECT([e, oc, kc]) AS mentions
+	WHERE SIZE(dc) > 1
+RETURN o, dc, mentions;
 ----
 
 == Cleanup

@@ -89,35 +89,3 @@ WITH d, s, sentence, k, key_phrase
     MERGE (k)<-[r:W_IN_K]-(w)
       ON CREATE SET r.c = word.c;
 ////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-// Process all key phrases of each sentence
-// - Link with an Named Entity if it appears inside the key phrase
-//
-MATCH (k:KP)-[:K_IN_S]->(s)
-WITH k, s
-  MATCH (s)<-[:E_IN_S]-(e:NE)
-    WHERE e.c CONTAINS k.c AND e.c <> k.c AND SIZE((e)<-[:K_IN_E]-(k)) = 0
-  MERGE (e)<-[:K_IN_E]-(k);
-//
-// Similarly for named entities
-//
-MATCH (e:NE)-[:K_IN_S]->(s)
-WITH e, s
-  MATCH (s)<-[:E_IN_S]-(oe:NE)
-    WHERE oe.c CONTAINS e.c AND oe.c <> e.c AND SIZE((oe)<-[:E_IN_E]-(e)) = 0
-  MERGE (oe)<-[:E_IN_E]-(e);
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-// Test query
-// - Find locations where the species are mentioned with project activity
-//
-MATCH (e:NE)-[:E_IN_S]->(s)<-[:E_IN_S]-(loc:LOC)-[:W_IN_E]-(w:LW)
-	WHERE e.c IN ["Coho", "Chinook", "Chum", "Sockeye"] AND w.l = "river"
-WITH e, loc
-	MATCH (e)-[:E_IN_D]->(d)<-[:K_IN_D]-(k:KP)-[:W_IN_K]-(w:LW)
-    	WHERE w.l IN ["habitat", "project", "grant"]
-WITH DISTINCT(d) AS d, e, COLLECT(DISTINCT(loc.c)) AS oc, COLLECT(DISTINCT(k.c)) AS kc
-RETURN DISTINCT(e.c) AS species, COLLECT([d.uid, oc, kc]) AS mentioned_locations;
-////////////////////////////////////////////////////////////////////////////////

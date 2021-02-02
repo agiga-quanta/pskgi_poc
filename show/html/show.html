@@ -386,25 +386,7 @@ UNWIND key_phrase.w AS word
     ON CREATE SET w.n = 0
     ON MATCH SET w.n = w.n + 1
   MERGE (k)&lt;-[r:W_IN_K]-(w)
-    ON CREATE SET r.c = word.c;
-
-//
-// Process all key phrases of each sentence
-// - Link with an Named Entity if it appears inside the key phrase
-//
-MATCH (k:KP)-[:K_IN_S]-&gt;(s)
-WITH k, s
-MATCH (s)&lt;-[:E_IN_S]-(e:NE)
-  WHERE e.c CONTAINS k.c AND e.c &lt;&gt; k.c AND SIZE((e)&lt;-[:K_IN_E]-(k)) = 0
-MERGE (e)&lt;-[:K_IN_E]-(k);
-//
-// Similarly for named entities
-//
-MATCH (e:NE)-[:K_IN_S]-&gt;(s)
-WITH e, s
-MATCH (s)&lt;-[:E_IN_S]-(oe:NE)
-  WHERE oe.c CONTAINS e.c AND oe.c &lt;&gt; e.c AND SIZE((oe)&lt;-[:E_IN_E]-(e)) = 0
-MERGE (oe)&lt;-[:E_IN_E]-(e);<!--/code--></pre>
+    ON CREATE SET r.c = word.c;<!--/code--></pre>
 </div>
 </div>
 	</div>
@@ -443,21 +425,72 @@ RETURN stats;<!--/code--></pre>
 
 <slide class="row-fluid">
   <div class="col-sm-12">
-    <h3>Querying Data</h3>
+    <h3>Post-processing: merging nodes (and their relationships)</h3>
     <br/>
     <div>
       <div class="paragraph">
-<p>We are looking for document contexts where:</p>
+<p>Multiple nodes for the same entity appear in the same document:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>specified salmon species appear in location containing <code>river</code></p>
+<p><code>PSF Community Salmon Program</code>, <code>The Community Salmon Program</code>, <code>CSP</code></p>
 </li>
 <li>
-<p>and words like habitat, project, grant should also appear</p>
+<p><code>The Pacific Salmon Foundation (PSF)</code>, <code>Pacific Salmon Foundation</code>, <code>PSF</code></p>
 </li>
 </ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (e:NE:ORG)-[:E_IN_D]-&gt;(d)
+	WHERE e.c IN ['PSF Community Salmon Program', 'The Community Salmon Program', 'CSP', 'The Pacific Salmon Foundation (PSF)', 'Pacific Salmon Foundation', 'PSF']
+RETURN e, d;<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>They can be merged by refactoring. List of terms can easily be configured.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->WITH [
+	['PSF Community Salmon Program', ['The Community Salmon Program', 'CSP']],
+	['The Pacific Salmon Foundation (PSF)', ['Pacific Salmon Foundation', 'PSF']]
+] AS same_terms_list
+UNWIND same_terms_list AS same_terms
+WITH same_terms[0] AS first_term, same_terms[1] AS the_rest
+MATCH (e1:NE:ORG {c: first_term})
+WITH e1, the_rest
+	MATCH (e2:NE:ORG)
+		WHERE e2.c IN the_rest
+WITH [e1] + COLLECT(e2) AS nodes
+	CALL apoc.refactor.mergeNodes(nodes, {properties: {c: "discard", n:"combine"}, mergeRels:true})
+		YIELD node
+WITH node
+	SET node.n = TOINTEGER(apoc.coll.sum(node.n))
+WITH node
+	MATCH (node)-[r:E_IN_D]-()
+	FOREACH (_ IN CASE WHEN apoc.meta.cypher.isType(r.n, 'LIST OF INTEGER') THEN [1] ELSE [] END |
+		SET r.n = TOINTEGER(apoc.coll.sum(r.n))
+	)
+RETURN node;<!--/code--></pre>
+</div>
+</div>
+	</div>
+  </div>
+</slide>
+
+
+
+<slide class="row-fluid">
+  <div class="col-sm-12">
+    <h3>Querying Data</h3>
+    <br/>
+    <div>
+      <div class="paragraph">
+<p>We are looking for document contexts where:
+- specified salmon species appear in location containing <code>river</code>
+- and words like <code>habitat</code>, <code>project</code>, <code>grant</code> should also appear in the document.</p>
 </div>
 <div class="paragraph">
 <p>Salmon species: Coho, Chinook, Chum, Sockeye</p>
@@ -471,6 +504,23 @@ WITH e, loc
   WHERE w.l IN ["habitat", "project", "grant"]
 WITH DISTINCT(d) AS d, e, COLLECT(DISTINCT(loc)) AS oc, COLLECT(DISTINCT(k)) AS kc
 RETURN DISTINCT(e) AS species, COLLECT([d, oc, kc]) AS mentioned_locations<!--/code--></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, let check what organizations were mentioned in these contexts.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre mode="cypher"  class="highlight pre-scrollable programlisting cm-s-neo code runnable standalone-example ng-binding" data-lang="cypher" lang="cypher"><!--code class="cypher language-cypher"-->MATCH (e:NE)-[:E_IN_S]-&gt;(s)&lt;-[:E_IN_S]-(loc:LOC)-[:W_IN_E]-(w:LW)
+  WHERE e.c IN ["Coho", "Chinook", "Chum", "Sockeye"] AND w.l = "river"
+WITH e, loc
+  MATCH (e)-[:E_IN_D]-&gt;(d)&lt;-[:K_IN_D]-(k:KP)-[:W_IN_K]-(w:LW)
+  WHERE w.l IN ["habitat", "project", "grant"]
+WITH DISTINCT(d) AS d, e, COLLECT(DISTINCT(loc)) AS oc, COLLECT(DISTINCT(k)) AS kc
+  MATCH (d)&lt;-[r:E_IN_D]-(o:NE:ORG)
+WITH DISTINCT(o) AS o, COLLECT(DISTINCT(d)) AS dc, COLLECT([e, oc, kc]) AS mentions
+	WHERE SIZE(dc) &gt; 1
+RETURN o, dc, mentions;<!--/code--></pre>
 </div>
 </div>
 	</div>
