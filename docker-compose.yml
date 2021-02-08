@@ -25,6 +25,36 @@ services:
       - ./conf:/conf
 
   ####################
+  # tika:
+  #
+  tika:
+    image: apache/tika:1.25-full
+    hostname: tika
+    container_name: tika
+    networks:
+      - backend
+    ports:
+      - 9998:9998
+
+  ####################
+  # extractor:
+  #
+  extractor:
+    build:
+      context: ./extractor
+      dockerfile: Dockerfile
+    image: nghiadh/extractor:0.1.0
+    hostname: extractor
+    container_name: extractor
+    networks:
+      - backend
+    ports:
+      - 8002:8002
+    volumes:
+      - ./conf:/conf
+      - ./import:/import
+
+  ####################
   # neo4j:
   # - Neo4j + APOC + Apache POI + Graph Data Science
   #
@@ -56,6 +86,8 @@ services:
       - NEO4J_apoc_export_file_enabled=true
       - NEO4J_apoc_jobs_pool_num__threads=4
       - NEO4J_apoc_jobs_scheduled_num__threads=4
+      - NEO4J_apoc_http_timeout_connect=60000
+      - NEO4J_apoc_http_timeout_read=120000
       - NEO4J_browser_remote__content__hostname__whitelist=*
 
   ####################
@@ -65,7 +97,7 @@ services:
     build:
       context: ./show
       dockerfile: Dockerfile
-    image: nghiadh/show:0.1.0
+    image: nghiadh/show:0.2.0
     hostname: show
     container_name: show
     ports:

@@ -70,12 +70,6 @@ WITH d, s, sentence, node AS e, entity
 WITH d, s, sentence
   UNWIND sentence.k AS key_phrase
 WITH d, s, sentence, key_phrase
-  OPTIONAL MATCH (e:NE {c: key_phrase.c})
-WITH d, s, sentence, key_phrase, e
-  FOREACH (_ IN CASE WHEN e IS NOT NULL THEN [1] ELSE [0] END |
-    SET e:KP
-  )
-WITH d, s, sentence, key_phrase
   MERGE (k:KP {c: key_phrase.c})
     ON CREATE SET k.n = 0
     ON MATCH SET k.n = k.n + 1
