@@ -430,7 +430,7 @@ What are the `common entities`, `phrases` among the documents?
 [source,cypher]
 ----
 WITH [
-	"Salmon Anatomy Vocabulary List.pdf",
+	"salmon_anatomy_vocabulary_list.pdf",
 	"Immediate Release_BC Watershed Security Investment  Sept 17,2020.pdf",
   "PSF Letter to Bernadette Jordan re Discovery Islands - December 2 2020.pdf"
 ] AS uid_list
